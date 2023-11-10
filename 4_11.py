@@ -9,12 +9,12 @@ import csv   #Em Trình install beautifulsoup4 với selenium bằng cmd nghe
 import pandas as pd
 
 chrome_options = Options()
-chrome_options.add_argument('--headless')
+chrome_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options = chrome_options)
-driver.get('https://topdev.vn/it-jobs?src=topdev.vn&medium=mainmenu')
+driver.get('https://topdev.vn/viec-lam-it?src=topdev.vn&medium=mainmenu')
 sleep(2)
 data_save_file_csv =[]
-def Get_URL(): 
+def GetURL(): #Hàm dùng để lặp đi lăp lại nếu muốn search nhiều trang web
     page_source = BeautifulSoup(driver.page_source,'html.parser')
     profiles = page_source.find_all('a',class_ = 'text-lg font-bold transition-all text-primary')
     all_profile_URL = []
@@ -24,12 +24,8 @@ def Get_URL():
         if profile_URL not in all_profile_URL:
             all_profile_URL.append(profile_URL)
     return all_profile_URL
-   
-URL_onepage = Get_URL()
+
+URL_onepage = GetURL()
 for url in URL_onepage:
     driver.get(url)
     sleep(2)
-    page_source = BeautifulSoup(driver.page_source,'html.parser')
-    info_div_pl3 = page_source.find_all('div',class_ = 'item-card-info mb-2 w-1/2 pl-3 md:mb-4 md:w-full md:pl-0')
-    info_div_md4 = page_source.find_all('div',class_ = 'item-card-info mb-2 w-1/2 md:mb-4 md:w-full')
-    print('test = ',info_div_md4)
