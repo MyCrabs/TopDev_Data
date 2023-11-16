@@ -44,8 +44,8 @@ def main():
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     driver = webdriver.Chrome(options=chrome_options)
-    
-    url = 'https://topdev.vn/viec-lam-it/java-kt21'
+
+    url = 'https://topdev.vn/viec-lam-it?src=topdev.vn&medium=mainmenu'
     driver.get(url)
     sleep(2)
     profile_urls  = get_profile_urls(driver, url)
@@ -57,5 +57,3 @@ def main():
     driver.close()
 if __name__ == '__main__':
     main()
-             
-                            
