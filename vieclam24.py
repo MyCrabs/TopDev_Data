@@ -7,10 +7,10 @@ import os
 
 def get_profile_urls(driver, url):
     page_source = BeautifulSoup(driver.page_source, 'html.parser')
-    div = page_source.find_all('div', class_ = 'job__list-item-content')
+    a = page_source.find_all('a',class_ = 'relative lg:h-[115px] w-full flex rounded-sm border lg:mb-3 mb-2 lg:hover:shadow-md !hover:bg-white border-se-blue-10')
     all_profile_urls = []
-    for profile in div:
-        profile_url = profile.find('h2',class_ = 'job__list-item-title').find('a').get('href')
+    for profile in a:
+        profile_url = 'https://vieclam24h.vn' + profile.get('href')
         if profile_url not in all_profile_urls:
             all_profile_urls.append(profile_url)
     return all_profile_urls
@@ -19,22 +19,17 @@ def get_profile_info(driver, url):
     driver.get(url)
     sleep(2)
     page_source = BeautifulSoup(driver.page_source, 'html.parser')
-    page_source = BeautifulSoup(driver.page_source, 'html.parser')
-    company_name = page_source.find('div', class_='col-md-9 content-group box-apply-top js-item-job').find('p').get_text(' ', strip=True)
-    div_salary = page_source.find('div', class_='item salary').find_all('b')
-    salary = div_salary[1].get_text(' ', strip=True)
-    eight_div = page_source.find_all('div', class_='item text-black')
-    exp_year = eight_div[2].get_text(' ', strip=True)
-    part = exp_year.split(':')
-    exp_year = part[1].lstrip()
-    edu = eight_div[4].get_text(' ', strip=True)
-    part_edu = edu.split(':')
-    edu = part_edu[1].lstrip()
-    div = page_source.find_all('div', class_='item time-expiry-date')
-    level = div[1].get_text(' ', strip=True)
-    part_level = level.split(':')
-    level = part_level[1].lstrip()
-    return company_name, exp_year, level, salary, edu 
+    company_name = page_source.find('h3', class_='font-normal text-16 text-se-neutral-64 mb-4').get_text(' ', strip=True)
+    salary = page_source.find('p', class_='font-semibold text-14 text-[#8B5CF6]').get_text(' ', strip=True)
+    div = page_source.find_all('div', class_='flex items-center mb-4 w-full md:w-[33%]')  # Co 3 div duoi
+    div_exp_year = div[2]
+    exp_year = div_exp_year.find('p').get_text(' ', strip=True)
+    divv = page_source.find_all('div', class_='flex items-center mb-4 md:w-[33%]')  # Co 4 div tren
+    div_level = divv[1]
+    level = div_level.find('p', class_='text-14').get_text(' ', strip=True)
+    div_edu = div[1]
+    edu = div_edu.find('p', class_='text-14').get_text(' ', strip=True)
+    return company_name, exp_year, level, salary, edu
 
 def write_to_csv(file_name, data):
     with open(os.path.join('data', file_name),'a+',encoding='UTF-8', newline='') as f:
@@ -49,7 +44,7 @@ def main():
     chrome_options.add_argument('--headless')
     #chrome_options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=chrome_options)
-    url = 'https://123job.vn/tuyen-dung?sort=top_related&q=tester&l='
+    url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?q=nh%C3%A2n%20vi%C3%AAn%20it'
     driver.get(url)
     sleep(2)
     profile_urls  = get_profile_urls(driver, url)
@@ -61,8 +56,8 @@ def main():
         if len(data) >= max_num_data:
             break
         else:
-            data.append((company_names, exp_years, levels, salaries, edu))   
-    write_to_csv('123job.csv',data)
+            data.append((company_names, exp_years, levels, salaries, edu))
+    write_to_csv('vieclam24.csv',data)
     driver.close()
 if __name__ == '__main__':
     main()
