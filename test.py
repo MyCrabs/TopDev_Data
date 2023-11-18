@@ -5,62 +5,72 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep
 import os
 
-import time
-
 def get_profile_urls(driver, url):
     page_source = BeautifulSoup(driver.page_source, 'html.parser')
-    profiles = page_source.find_all('a', class_ = 'text-lg font-bold transition-all text-primary')
-    all_profile_urls = []
-    for profile in profiles:
-        profile_id = profile.get('href')
-        profile_url = 'https://topdev.vn/' + profile_id
-        if profile_url not in all_profile_urls:
-            all_profile_urls.append(profile_url)
-    return all_profile_urls
-
+    try:
+        a = page_source.find_all('a', class_='relative lg:h-[115px] w-full flex rounded-sm border lg:mb-3 mb-2 lg:hover:shadow-md !hover:bg-white border-se-blue-10')
+        all_profile_urls = []
+        for profile in a:
+            profile_url = 'https://vieclam24h.vn' + profile.get('href')
+            if profile_url not in all_profile_urls:
+                all_profile_urls.append(profile_url)
+        return all_profile_urls
+    except Exception as e:
+        print(f"Error occurred while extracting profile URLs from {url}: {e}")
+        return []
+    
 def get_profile_info(driver, url):
-    driver.get(url)
-    sleep(2)
-    page_source = BeautifulSoup(driver.page_source, 'html.parser')
-    info_div_pl3 = page_source.find_all('div', class_='item-card-info mb-2 w-1/2 pl-3 md:mb-4 md:w-full md:pl-0')
-    info_div_md4 = page_source.find_all('div', class_='item-card-info mb-2 w-1/2 md:mb-4 md:w-full')
-    a_exp_year = info_div_md4[0].find_all('a', class_='text-sm hover:text-primary-300 hover:underline md:text-base')
-    a_level = info_div_pl3[0].find_all('a', class_='text-sm hover:text-primary-300 hover:underline md:text-base')
-    a_work_place = info_div_md4[1].find_all('a', class_='text-sm hover:text-primary-300 hover:underline md:text-base')
-
-    company_names = page_source.find('p', class_='my-1 text-base font-bold text-gray-500').get_text(' ', strip=True)
-    exp_years = a_exp_year[0].get_text(' ', strip=True)
-    levels = a_level[0].get_text(' ', strip=True)
-    work_places = a_work_place[0].get_text(' ', strip=True)
-    return company_names, exp_years, levels, work_places
+    try:
+        driver.get(url)
+        sleep(2)
+        page_source = BeautifulSoup(driver.page_source, 'html.parser')
+        company_name = page_source.find('h3', class_='font-normal text-16 text-se-neutral-64 mb-4').get_text(' ', strip=True)
+        salary = page_source.find('p', class_='font-semibold text-14 text-[#8B5CF6]').get_text(' ', strip=True)
+        div = page_source.find_all('div', class_='flex items-center mb-4 w-full md:w-[33%]')
+        div_exp_year = div[2]
+        exp_year = div_exp_year.find('p').get_text(' ', strip=True)
+        divv = page_source.find_all('div', class_='flex items-center mb-4 md:w-[33%]')
+        div_level = divv[2]
+        level = div_level.find('p', class_='text-14').get_text(' ', strip=True)
+        div_edu = div[1]
+        edu = div_edu.find('p', class_='text-14').get_text(' ', strip=True)
+        return [company_name, exp_year, level, salary, edu]
+    except Exception as e:
+        print(f"Error occurred while scraping data from {url}: {e}")
+        return []
 
 def write_to_csv(file_name, data):
     with open(os.path.join('data', file_name),'a+',encoding='UTF-8', newline='') as f:
         writer = csv.writer(f)
         if f.tell() == 0:
-            writer.writerow(['Company Name', 'Experience Years', 'Levels', 'Work Places'])
+            writer.writerow(['Company Name', 'Experience Years', 'Levels', 'Salary', 'Education_Requirement'])
         for info in data:
             writer.writerow(info)
+            
 
 def main():
     chrome_options = Options()
-    #chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--headless')
+    #chrome_options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=chrome_options)
-    url = 'https://topdev.vn/viec-lam-it?src=topdev.vn&medium=mainmenu'
+    url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?q=nh%C3%A2n%20vi%C3%AAn%20it'
     driver.get(url)
-    sleep(3)
-    for i in range(3):
-        driver.execute_script('window.scrollTo(0, 2500)')
-        sleep(4)
-        
+    sleep(2)
     profile_urls  = get_profile_urls(driver, url)
     data = []
+    infos = []
+    max_num_data = 10
     for profile_url in profile_urls:
-        company_names, exp_years, levels, work_places = get_profile_info(driver, profile_url)
-        data.append((company_names, exp_years, levels, work_places))
-    #write_to_csv('test_data.csv',data)
+        info = get_profile_info(driver, profile_url)
+        print('>>> Name:', info)   #Dung de check khi co loi xay ra
+        if info == []:
+            pass
+        else: 
+            if len(data) >= max_num_data:
+                break
+            else:
+                data.append(info)            
+    write_to_csv('test.csv',data)
     driver.close()
 if __name__ == '__main__':
     main()
-             
-                            
