@@ -25,6 +25,13 @@ def get_profile_info(driver, url):
         sleep(2)
         page_source = BeautifulSoup(driver.page_source, 'html.parser')
         company_name = page_source.find('h3', class_='font-normal text-16 text-se-neutral-64 mb-4').get_text(' ', strip=True)
+        title = page_source.find('h1', class_='font-semibold text-18 md:text-24 leading-snug').get_text(' ', strip=True)
+        a = page_source.find('a', class_ ='hover:text-se-accent')
+        venue = a.find('span').get_text(' ',strip=True)
+        date_div = page_source.find_all('div', class_ ='ml-3 text-14 md:flex pt-0 md:pt-[5px]')
+        date_ = date_div[1].get_text(' ',strip=True)
+        part = date_.find(':')
+        date = date_[part + 2:]
         salary = page_source.find('p', class_='font-semibold text-14 text-[#8B5CF6]').get_text(' ', strip=True)
         div = page_source.find_all('div', class_='flex items-center mb-4 w-full md:w-[33%]')
         div_exp_year = div[2]
@@ -34,7 +41,9 @@ def get_profile_info(driver, url):
         level = div_level.find('p', class_='text-14').get_text(' ', strip=True)
         div_edu = div[1]
         edu = div_edu.find('p', class_='text-14').get_text(' ', strip=True)
-        return [company_name, exp_year, level, salary, edu]
+        pic_div = page_source.find('div', class_ ='md:flex w-full items-start')
+        src_pic = pic_div.find('img').get('src')
+        return [title, company_name, venue, date, exp_year, level, salary, edu, src_pic]
     except Exception as e:
         print(f"Error occurred while scraping data from {url}: {e}")
         return []
@@ -43,7 +52,7 @@ def write_to_csv(file_name, data):
     with open(os.path.join('data', file_name),'a+',encoding='UTF-8', newline='') as f:
         writer = csv.writer(f)
         if f.tell() == 0:
-            writer.writerow(['Company Name', 'Experience Years', 'Levels', 'Salary', 'Education_Requirement'])
+            writer.writerow(['Title', 'Company Name', 'Venue', 'Date', 'Experience Year', 'Level', 'Salary', 'Education_Requirement', 'Source Picture'])
         for info in data:
             writer.writerow(info)
             
@@ -59,7 +68,7 @@ def main():
     profile_urls  = get_profile_urls(driver, url)
     data = []
     infos = []
-    max_num_data = 20
+    max_num_data = 35
     for profile_url in profile_urls:
         info = get_profile_info(driver, profile_url)
         print('>>> Name:', info)   #Dung de check khi co loi xay ra
@@ -70,7 +79,7 @@ def main():
                 break
             else:
                 data.append(info)            
-    write_to_csv('test.csv',data)
+    write_to_csv('vieclam24.csv',data)
     driver.close()
 if __name__ == '__main__':
     main()
