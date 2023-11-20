@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
 import os
+import mysql.connector
 
 def get_profile_urls(driver, url):
     page_source = BeautifulSoup(driver.page_source, 'html.parser')
@@ -46,21 +47,20 @@ def get_profile_info(driver, url):
         return [title, company_name, venue, date, exp_year, level, salary, edu, src_pic]
     except Exception as e:
         print(f"Error occurred while scraping data from {url}: {e}")
-        return []
+        return [] 
 
-def write_to_csv(file_name, data):
-    with open(os.path.join('data', file_name),'a+',encoding='UTF-8', newline='') as f:
-        writer = csv.writer(f)
-        if f.tell() == 0:
-            writer.writerow(['Title', 'Company Name', 'Venue', 'Date', 'Experience Year', 'Level', 'Salary', 'Education_Requirement', 'Source Picture'])
-        for info in data:
-            writer.writerow(info)
-            
+def save_data_into_database(data):
+    connection = mysql.connector.connect(user='root', password='123456', host='localhost')
+    cursor = connection.cursor()
+    query = "INSERT INTO `test`.`test_table3` (`title`, `company_name`, `venue`, `date`, `exp_year`, `level`, `salary`, `edu`, `src_pic`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    for i in data:
+        cursor.execute(query, i)
+    connection.commit()
+    connection.close()          
 
 def main():
     chrome_options = Options()
     chrome_options.add_argument('--headless')
-    #chrome_options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=chrome_options)
     url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?q=nh%C3%A2n%20vi%C3%AAn%20it'
     driver.get(url)
@@ -68,18 +68,18 @@ def main():
     profile_urls  = get_profile_urls(driver, url)
     data = []
     infos = []
-    max_num_data = 35
+    max_num_data = 30
     for profile_url in profile_urls:
         info = get_profile_info(driver, profile_url)
-        print('>>> Name:', info)   #Dung de check khi co loi xay ra
+        print('>>> Info:', info)
         if info == []:
             pass
         else: 
             if len(data) >= max_num_data:
                 break
             else:
-                data.append(info)            
-    write_to_csv('vieclam24.csv',data)
+                data.append(info)
+    save_data_into_database(data)            
     driver.close()
 if __name__ == '__main__':
     main()

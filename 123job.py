@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
 import os
+import mysql.connector
 
 def get_profile_urls(driver, url):
     page_source = BeautifulSoup(driver.page_source, 'html.parser')
@@ -52,20 +53,20 @@ def get_profile_info(driver, url):
         print(f"Error occurred while scraping data from {url}: {e}")
         return []
 
-def write_to_csv(file_name, data):
-    with open(os.path.join('data', file_name),'a+',encoding='UTF-8', newline='') as f:
-        writer = csv.writer(f)
-        if f.tell() == 0:
-            writer.writerow(['Title', 'Company Name', 'Venue', 'Date', 'Experience Year', 'Level', 'Salary', 'Education_Requirement', 'Source Picture'])
-        for info in data:
-            writer.writerow(info)
-
+def save_data_into_database(data):
+    connection = mysql.connector.connect(user='root', password='123456', host='localhost')
+    cursor = connection.cursor()
+    query = 'INSERT INTO `test`.`test_table3` (`title`, `company_name`, `venue`, `date`, `exp_year`, `level`, `salary`, `edu`, `src_pic`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+    for i in data:
+        cursor.execute(query, i)
+    connection.commit()
+    connection.close()
+    
 def main():
     chrome_options = Options()
     chrome_options.add_argument('--headless')
-    #chrome_options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=chrome_options)
-    url = 'https://123job.vn/tuyen-dung?sort=top_related&q=Nh%C3%A2n+Vi%C3%AAn+IT&l='
+    url = 'https://123job.vn/tuyen-dung?sort=top_related&q=IT+ph%E1%BA%A7n+m%E1%BB%81m&l='
     driver.get(url)
     sleep(2)
     profile_urls  = get_profile_urls(driver, url)
@@ -81,8 +82,8 @@ def main():
             if len(data) >= max_num_data:
                 break
             else:
-                data.append(info)   
-    write_to_csv('123job.csv',data)
+                data.append(info) 
+    save_data_into_database(data)  
     driver.close()
 if __name__ == '__main__':
     main()
