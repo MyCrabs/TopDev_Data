@@ -1,9 +1,7 @@
-import csv 
 from bs4 import BeautifulSoup 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
-import os
 import mysql.connector
 
 def get_profile_urls(driver, url):
@@ -71,8 +69,7 @@ def main():
     sleep(2)
     profile_urls  = get_profile_urls(driver, url)
     data = []
-    infos = []
-    max_num_data = 35
+    max_num_data = 5
     for profile_url in profile_urls:
         info = get_profile_info(driver, profile_url)
         print('>>> Info:', info)

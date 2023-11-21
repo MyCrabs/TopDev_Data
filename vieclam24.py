@@ -1,11 +1,10 @@
-import csv 
 from bs4 import BeautifulSoup 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
 import os
 import mysql.connector
-
+    
 def get_profile_urls(driver, url):
     page_source = BeautifulSoup(driver.page_source, 'html.parser')
     try:
@@ -62,12 +61,11 @@ def main():
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     driver = webdriver.Chrome(options=chrome_options)
-    url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?q=nh%C3%A2n%20vi%C3%AAn%20it'
+    url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page=5&q=nh%C3%A2n%20vi%C3%AAn%20it&sort_q=actived_at_by_box%2Cdesc'
     driver.get(url)
     sleep(2)
     profile_urls  = get_profile_urls(driver, url)
     data = []
-    infos = []
     max_num_data = 30
     for profile_url in profile_urls:
         info = get_profile_info(driver, profile_url)
