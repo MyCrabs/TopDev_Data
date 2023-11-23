@@ -95,12 +95,31 @@ def get_profile_info_123(driver, url):
     except Exception as e:
         print(f"Error occurred while scraping data from {url}: {e}")
         return []
+    
+def is_duplicated(info, data):
+    for i in data:
+        if i[1] == info[0] and i[2] == info[1]:
+            return True
+    return False 
+
+def get_data_from_DB():
+    try:
+        connection = mysql.connector.connect(user='root', password='123456', host='localhost')
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM test.test_table3")
+        data = cursor.fetchall()
+        connection.close()
+        return data
+    except Exception as e:
+        print(f"Error occurred while retrieving data from database: {e}")
+        return []
 
 def get_vieclam24(driver, max_num):
-    url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page=5&q=nh%C3%A2n%20vi%C3%AAn%20it&sort_q=actived_at_by_box%2Cdesc'
+    url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?occupation_ids%5B%5D=8&page=1&sort_q=actived_at_by_box%2Cdesc'
     driver.get(url)
     sleep(2)
     profile_urls = get_profile_urls_24(driver, url)
+    data_DB = get_data_from_DB()
     data =[]
     for i in profile_urls:
         info = get_profile_info_24(driver, i)
@@ -111,14 +130,16 @@ def get_vieclam24(driver, max_num):
             if len(data) >= max_num:
                 break
             else:
-                data.append(info)
-    return data
+                if not is_duplicated(info , data_DB):
+                    data.append(info)
+    return data 
 
 def get_123job(driver, max_num):
-    url = 'https://123job.vn/tuyen-dung?sort=top_related&q=IT+ph%E1%BA%A7n+m%E1%BB%81m&l='
+    url = 'https://123job.vn/tuyen-dung?sort=up_top&q=IT+ph%E1%BA%A7n+m%E1%BB%81m&l='
     driver.get(url)
     sleep(2)
     profile_urls = get_profile_urls_123(driver, url)
+    data_DB = get_data_from_DB()
     data =[]
     for i in profile_urls:
         info = get_profile_info_123(driver, i)
@@ -129,7 +150,8 @@ def get_123job(driver, max_num):
             if len(data) >= max_num: 
                 break
             else:
-                data.append(info)
+                if not is_duplicated(info, data_DB):
+                    data.append(info)
     return data
     
 def save_data_into_DB(data):
