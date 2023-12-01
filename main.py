@@ -135,7 +135,7 @@ def get_vieclam24(driver, max_num):
     return data 
 
 def get_123job(driver, max_num):
-    url = 'https://123job.vn/tuyen-dung?sort=up_top&q=IT+ph%E1%BA%A7n+m%E1%BB%81m&l='
+    url = 'https://123job.vn/tuyen-dung?sort=new&q=Nh%C3%A2n+Vi%C3%AAn+Marketing&l=#google_vignette'
     driver.get(url)
     sleep(2)
     profile_urls = get_profile_urls_123(driver, url)
@@ -172,7 +172,7 @@ def main():
     try:
         with webdriver.Chrome(options=chrome_options) as driver:
             pool = concurrent.futures.ThreadPoolExecutor(max_workers=2) #Dung Pool de chay da luong multiThread
-            max_num = 5
+            max_num = 40
             future = pool.submit(get_vieclam24, driver, max_num)
             data = future.result()
             future = pool.submit(get_123job, driver, max_num)
@@ -185,3 +185,5 @@ def main():
     
 if __name__ == '__main__':
     main()
+
+#Test doi version Python
