@@ -1,10 +1,10 @@
-from venv import logger 
+import concurrent.futures
+from venv import logger
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
 import mysql.connector
-
 def get_profile_urls_24(driver, url):
     page_source = BeautifulSoup(driver.page_source, 'html.parser')
     try:
@@ -32,7 +32,6 @@ def get_profile_urls_123(driver, url):
     except Exception as e:
         logger.error(f"Error occurred while extracting profile URLs from {url}: {e}")
         return []
-    
 def get_profile_info_24(driver, url):
     try:
         driver.get(url)
@@ -57,12 +56,11 @@ def get_profile_info_24(driver, url):
         edu = div_edu.find('p', class_='text-14').get_text(' ', strip=True)
         pic_div = page_source.find('div', class_ ='md:flex w-full items-start')
         src_pic = pic_div.find('img').get('src')
-        
         return [title, company_name, venue, date, exp_year, level, salary, edu, src_pic]
     except Exception as e:
         logger.error(f"Error occurred while scraping data from {url}: {e}")
         return []
-
+    
 def get_profile_info_123(driver, url):
     try:
         driver.get(url)
@@ -98,29 +96,29 @@ def get_profile_info_123(driver, url):
         span = div_more.find_all('span',class_='block-mobile')
         num_of_employee = span[0].get_text(' ',strip=True)
         head_quater = span[1].get_text(' ',strip=True)
-        return [title, company_name, head_quater, date, exp_year, level, salary, edu, description, requirement, num_of_employee, src_pic]
+        return [title, company_name, venue, date, exp_year, level, salary, edu, src_pic,description,requirement,num_of_employee,head_quater]
     except Exception as e:
         print(f"Error occurred while scraping data from {url}: {e}")
         return []
-    
+
 def is_duplicated(info, data):
     for i in data:
         if i[1] == info[0] and i[2] == info[1]:
             return True
-    return False
+    return False 
 
 def get_data_from_DB():
     try:
         connection = mysql.connector.connect(user='root', password='123456', host='localhost')
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM crawl_data.job_data")
+        cursor.execute("SELECT * FROM test.test_table3")
         data = cursor.fetchall()
         connection.close()
         return data
     except Exception as e:
         print(f"Error occurred while retrieving data from database: {e}")
         return []
-    
+
 def get_vieclam24(driver, max_num):
     url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?occupation_ids%5B%5D=8&page=1&sort_q=actived_at_by_box%2Cdesc'
     driver.get(url)
@@ -139,7 +137,7 @@ def get_vieclam24(driver, max_num):
             else:
                 if not is_duplicated(info , data_DB):
                     data.append(info)
-    return data
+    return data 
 
 def get_123job(driver, max_num):
     url = 'https://123job.vn/tuyen-dung?s=0&sort=up_top&q=&l='
@@ -161,3 +159,34 @@ def get_123job(driver, max_num):
                     data.append(info)
     return data
 
+def save_data_into_DB(data):
+    try:
+        connection = mysql.connector.connect(user='root', password='123456', host='localhost')
+        cursor = connection.cursor()
+        query = "INSERT INTO `test`.`test_table3` (`title`, `company_name`, `venue`, `date`, `exp_year`, `level`, `salary`, `edu`, `src_pic`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        for i in data:
+            cursor.execute(query, i)
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        logger.error(f"Error occured while saving data to DB: {e}")
+        
+def main():
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    try:
+        with webdriver.Chrome(options=chrome_options) as driver:
+            pool = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+            max_num = 2
+            future = pool.submit(get_123job, driver, max_num)
+            data = future.result()
+            # future = pool.submit(get_vieclam24, driver, max_num)
+            # data.extend(future.result())
+            pool.shutdown(wait=True)
+            #save_data_into_DB(data)
+    except Exception as e:
+        logger.error(f"Error occurred while scraping data: {e}")
+    print('>> Done')
+    
+if __name__ == '__main__':
+    main()

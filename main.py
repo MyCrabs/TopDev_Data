@@ -10,12 +10,12 @@ def main():
     chrome_options.add_argument('--headless')
     try:
         with webdriver.Chrome(options=chrome_options) as driver:
-            pool = concurrent.futures.ThreadPoolExecutor(max_workers=2) #Dung Pool de chay da luong multiThread
-            max_num = 5
-            future = pool.submit(get_vieclam24, driver, max_num)
-            data = future.result()
+            pool = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+            max_num = 20
             future = pool.submit(get_123job, driver, max_num)
-            data.extend(future.result())
+            data = future.result()
+            # future = pool.submit(get_vieclam24, driver, max_num)
+            #data.extend(future.result())
             pool.shutdown(wait=True)
             save_data_into_DB(data)
     except Exception as e:
