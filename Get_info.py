@@ -8,7 +8,7 @@ import mysql.connector
 def get_profile_urls_24(driver, url):
     page_source = BeautifulSoup(driver.page_source, 'html.parser')
     try:
-        a = page_source.find_all('a', class_='relative lg:h-[115px] w-full flex rounded-sm border lg:mb-3 mb-2 lg:hover:shadow-md !hover:bg-white border-se-blue-10')
+        a = page_source.find_all('a', class_='relative lg:h-[115px] w-full flex rounded-sm border lg:mb-3 mb-2 lg:hover:shadow-md !hover:bg-white !bg-[#FFF5E7] border-se-blue-10')
         all_profile_urls = []
         for profile in a:
             profile_url = 'https://vieclam24h.vn' + profile.get('href')
@@ -49,7 +49,7 @@ def get_profile_info_24(driver, url):
         salary = page_source.find('p', class_='font-semibold text-14 text-[#8B5CF6]').get_text(' ', strip=True)
         div = page_source.find_all('div', class_='flex items-center mb-4 w-full md:w-[33%]')
         div_exp_year = div[2]
-        exp_year = div_exp_year.find('p').get_text(' ', strip=True)
+        exp_year = div_exp_year.find('p', class_ = 'text-14').get_text(' ', strip=True)
         divv = page_source.find_all('div', class_='flex items-center mb-4 md:w-[33%]')
         div_level = divv[1]
         level = div_level.find('p', class_='text-14').get_text(' ', strip=True)
@@ -57,8 +57,14 @@ def get_profile_info_24(driver, url):
         edu = div_edu.find('p', class_='text-14').get_text(' ', strip=True)
         pic_div = page_source.find('div', class_ ='md:flex w-full items-start')
         src_pic = pic_div.find('img').get('src')
-        
-        return [title, company_name, venue, date, exp_year, level, salary, edu, src_pic]
+        last_div = page_source.find_all('div', class_ ='text-14 text-se-grey-48 font-semibold')
+        head_quater = last_div[0].get_text(' ',strip=True)
+        num_of_employee = last_div[1].get_text(' ',strip=True)
+        describe_div = page_source.find_all('div', class_ = 'jsx-d84db6a84feb175e mb-2 text-14 break-words text-se-neutral-80 text-description')
+        description = describe_div[0].get_text(' ',strip=True)
+        requirement = describe_div[1].get_text(' ',strip=True)
+        job = page_source.find('p', class_ = 'text-14 text-se-accent font-semibold').get_text(' ',strip=True)    
+        return [title, company_name, job, head_quater, date, exp_year, level, salary, edu, description, requirement, num_of_employee, src_pic]
     except Exception as e:
         logger.error(f"Error occurred while scraping data from {url}: {e}")
         return []
@@ -122,24 +128,30 @@ def get_data_from_DB():
         return []
     
 def get_vieclam24(driver, max_num):
-    url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?occupation_ids%5B%5D=8&page=1&sort_q=actived_at_by_box%2Cdesc'
-    driver.get(url)
-    sleep(2)
-    profile_urls = get_profile_urls_24(driver, url)
-    data_DB = get_data_from_DB()
-    data =[]
-    for i in profile_urls:
-        info = get_profile_info_24(driver, i)
-        print('>> Vieclam24:',info)
-        if info == []:
-            pass
-        else:
-            if len(data) >= max_num:
-                break
+    try:
+        url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page=2&sort_q='
+        #url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?occupation_ids%5B%5D=8&page=7&sort_q='
+        #url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?occupation_ids[]=12'
+        driver.get(url)
+        sleep(2)
+        profile_urls = get_profile_urls_24(driver, url)
+        data_DB = get_data_from_DB()
+        data =[]
+        for i in profile_urls:
+            info = get_profile_info_24(driver, i)
+            print('>> Vieclam24:',info)
+            if info == []:
+                pass
             else:
-                if not is_duplicated(info , data_DB):
-                    data.append(info)
-    return data
+                if len(data) >= max_num:
+                    break
+                else:
+                    if not is_duplicated(info , data_DB):
+                        data.append(info)
+        return data
+    except Exception as e:
+        print(f"Error occurred while retrieving data from database: {e}")
+        return []
 
 def get_123job(driver, max_num):
     url = 'https://123job.vn/tuyen-dung?s=0&sort=up_top&q=&l='
@@ -159,5 +171,6 @@ def get_123job(driver, max_num):
             else:
                 if not is_duplicated(info, data_DB):
                     data.append(info)
+    print('>>>',data)
     return data
 
