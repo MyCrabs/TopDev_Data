@@ -12,3 +12,15 @@ def save_data_into_DB(data):
         connection.close()
     except Exception as e:
         logger.error(f"Error occured while saving data to DB: {e}")
+
+def get_data_from_DB():
+    try:
+        connection = mysql.connector.connect(user='root', password='123456', host='localhost')
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM crawl_data.job_data")
+        data = cursor.fetchall()
+        connection.close()
+        return data
+    except Exception as e:
+        print(f"Error occurred while retrieving data from database: {e}")
+        return []
