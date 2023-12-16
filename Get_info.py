@@ -50,21 +50,31 @@ def get_profile_info_24(driver, url):
         div = page_source.find_all('div', class_='flex items-center mb-4 w-full md:w-[33%]')
         div_exp_year = div[2]
         exp_year = div_exp_year.find('p', class_ = 'text-14').get_text(' ', strip=True)
-        divv = page_source.find_all('div', class_='flex items-center mb-4 md:w-[33%]')
-        div_level = divv[1]
-        level = div_level.find('p', class_='text-14').get_text(' ', strip=True)
+        div_c1 = page_source.find_all('div', class_ = 'jsx-d84db6a84feb175e md:flex md:border-b border-[#DDD6FE] mb-4')
+        divv = div_c1[0].find_all('div', class_='flex items-center mb-4 md:w-[33%]')
+        if len(div_c1[0].find_all('div', class_ = 'flex items-center mb-4 md:w-[33%]'))== 2:
+            div_level = divv[1]
+            level = div_level.find('p', class_='text-14').get_text(' ', strip=True)
+        elif len(div_c1[0].find_all('div', class_ = 'flex items-center mb-4 md:w-[33%]'))== 3:
+            div_level = divv[2]
+            level = div_level.find('p', class_='text-14').get_text(' ', strip=True)
+        if len(div_c1[1].find_all('div', class_ = 'flex items-center mb-4 md:w-[33%]')) == 1:
+            num_div = div_c1[1].find('div', class_ = 'flex items-center mb-4 md:w-[33%]')
+            num_of_employee = num_div.find('p', class_ = 'text-14').get_text(' ', strip=True)
+        elif len(div_c1[1].find_all('div', class_ = 'flex items-center mb-4 md:w-[33%]')) == 2:
+            num_div = div_c1[1].find_all('div', class_ = 'flex items-center mb-4 md:w-[33%]')
+            num_of_employee = num_div[1].find('p', class_ = 'text-14').get_text(' ', strip=True)
         div_edu = div[1]
         edu = div_edu.find('p', class_='text-14').get_text(' ', strip=True)
         pic_div = page_source.find('div', class_ ='md:flex w-full items-start')
         src_pic = pic_div.find('img').get('src')
         last_div = page_source.find_all('div', class_ ='text-14 text-se-grey-48 font-semibold')
         head_quater = last_div[0].get_text(' ',strip=True)
-        num_of_employee = last_div[1].get_text(' ',strip=True)
         describe_div = page_source.find_all('div', class_ = 'jsx-d84db6a84feb175e mb-2 text-14 break-words text-se-neutral-80 text-description')
         description = describe_div[0].get_text(' ',strip=True)
         requirement = describe_div[1].get_text(' ',strip=True)
         job = page_source.find('p', class_ = 'text-14 text-se-accent font-semibold').get_text(' ',strip=True)    
-        return [title, company_name, job, head_quater, date, exp_year, level, salary, edu, description, requirement, num_of_employee, src_pic]
+        return [title, company_name, job, head_quater, num_of_employee, exp_year, level, salary, edu, description, requirement, date, src_pic]
     except Exception as e:
         logger.error(f"Error occurred while scraping data from {url}: {e}")
         return []
@@ -126,12 +136,11 @@ def get_data_from_DB():
     except Exception as e:
         print(f"Error occurred while retrieving data from database: {e}")
         return []
-    
+
 def get_vieclam24(driver, max_num):
     try:
-        url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page=2&sort_q='
-        #url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?occupation_ids%5B%5D=8&page=7&sort_q='
-        #url = 'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?occupation_ids[]=12'
+        url ='https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page=2&sort_q='
+        print('>>> URL: ',url)
         driver.get(url)
         sleep(2)
         profile_urls = get_profile_urls_24(driver, url)
@@ -150,7 +159,7 @@ def get_vieclam24(driver, max_num):
                         data.append(info)
         return data
     except Exception as e:
-        print(f"Error occurred while retrieving data from database: {e}")
+        print(f"Error occurred while get data 24h: {e}")
         return []
 
 def get_123job(driver, max_num):

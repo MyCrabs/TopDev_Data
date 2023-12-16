@@ -5,7 +5,7 @@ def save_data_into_DB(data):
     try:
         connection = mysql.connector.connect(user='root', password='123456', host='localhost')
         cursor = connection.cursor()
-        query = "INSERT INTO `crawl_data`.`job_data` (`Title`, `Company_Name`, `Job`, `Place`, `Deadline`, `Experience`, `Level`, `Salary`, `Education`, `Description`, `Requirement`, `Number_Employee`, `Source_Picture`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        query = "INSERT INTO `crawl_data`.`job_data` (`Title`, `Company_Name`, `Job`, `Place`, `Number_Employee`, `Experience`, `Level`, `Salary`, `Education`, `Description`, `Requirement`, `Deadline`, `Source_Picture`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         for i in data:
             cursor.execute(query, i)
         connection.commit()
