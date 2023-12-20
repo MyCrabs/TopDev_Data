@@ -11,8 +11,7 @@ def main():
     try:
         with webdriver.Chrome(options=chrome_options) as driver:
             pool = concurrent.futures.ThreadPoolExecutor(max_workers=2)
-            max_num = 5
-            future = pool.submit(get_vieclam24, driver, max_num)
+            future = pool.submit(get_vieclam24, driver, 50)
             data = future.result()
             # future = pool.submit(get_vieclam24, driver, max_num)
             #data.extend(future.result())

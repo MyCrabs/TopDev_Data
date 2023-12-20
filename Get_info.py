@@ -99,35 +99,35 @@ def get_profile_info_123(driver, url):
     
 def is_duplicated(info, data):
     for i in data:
-        if i[1] == info[0] and i[2] == info[1]:
+        if i[1] == info[0] and i[2] == info[1] and i[3] == info[2]:
             return True
     return False
 
 def get_vieclam24(driver, max_num):
     try:
-        url ='https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page=1&sort_q='
-        print('>>> URL: ',url)
-        driver.get(url)
-        sleep(2)
-        profile_urls = get_profile_urls_24(driver, url)
-        data_DB = get_data_from_DB()
+        num_page = 14
         data =[]
-        for i in profile_urls:
-            info = get_profile_info_24(driver, i)
-            print('>> Vieclam24:',info)
-            if info == []:
-                pass
-            else:
-                if len(data) >= max_num:
-                    break
+        while len(data) < max_num:
+            url = f'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page={num_page}&sort_q='
+            print('>>> URL: ',url)
+            driver.get(url)
+            sleep(2)
+            profile_urls = get_profile_urls_24(driver, url)
+            data_DB = get_data_from_DB()     
+            for i in profile_urls:
+                info = get_profile_info_24(driver, i)
+                print('>> Vieclam24:',info)
+                if info == []:
+                    pass
                 else:
                     if not is_duplicated(info , data_DB):
                         data.append(info)
+            num_page += 1
         return data
     except Exception as e:
         print(f"Error occurred while get data 24h: {e}")
         return []
-    
+   
 def get_123job(driver, max_num):
     url = 'https://123job.vn/tuyen-dung?s=0&sort=up_top&q=&l='
     driver.get(url)
