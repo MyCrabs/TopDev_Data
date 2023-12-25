@@ -9,12 +9,13 @@ chrome_options = Options()
 chrome_options.add_argument('--headless')
 #chrome_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options = chrome_options)
-url = 'https://vieclam24h.vn/marketing/nhan-vien-kinh-doanh-c12p119id200282421.html'
+url = 'https://vieclam24h.vn/cham-soc-khach-hang/tong-dai-vien-truc-hotline-vien-thong-viettel-tan-binh-c30p122id200289357.html'
 driver.get(url)
 sleep(2)
 page_source = BeautifulSoup(driver.page_source,'html.parser')
-company_name = page_source.find('h3', class_='font-normal text-16 text-se-neutral-64 mb-4').get_text(' ', strip=True)
-print('>>>',company_name)
+div = page_source.find_all('div', class_ = 'jsx-d84db6a84feb175e md:flex md:border-b border-[#DDD6FE] mb-4')
+age = div[2].find('div', class_ = 'flex items-center mb-4 md:w-[33%]').find('p', class_ = 'text-14').get_text(' ',strip = True)
+print('>>>',len(div))
 
 
 
