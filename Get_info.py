@@ -56,13 +56,13 @@ def is_duplicated(info, data):
             return True
     return False
 
-def get_vieclam24(driver, max_num):
+def get_vieclam24(driver, num_pages):
     try:
-        num_page = 1
+        page_start = 1
         data =[]
-        while len(data) < max_num:
-            url = f'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page={num_page}&sort_q=actived_at_by_box%2Cdesc'
-            print('>>> URL: ',url)
+        while page_start <= num_pages:
+            url = f'https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?page={page_start}&sort_q='
+            print('>>>URL', url)
             driver.get(url)
             sleep(2)
             profile_urls = get_profile_urls_24(driver, url)
@@ -78,7 +78,7 @@ def get_vieclam24(driver, max_num):
                         data.append(info)
                     else:
                         print('>> In DB')
-            num_page += 1
+            page_start += 1
         return data
     except Exception as e:
         print(f"Error occurred while get data 24h: {e}")
