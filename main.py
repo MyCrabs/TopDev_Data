@@ -10,7 +10,7 @@ def main():
     chrome_options.add_argument('--headless')
     try:
         with webdriver.Chrome(options=chrome_options) as driver:        
-            data = get_vieclam24(driver, 3)
+            data = get_vieclam24(driver, 1)
             #save_data_into_DB(data)
     except Exception as e:
         logger.error(f"Error occurred while scraping data: {e}")

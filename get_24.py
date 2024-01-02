@@ -108,6 +108,8 @@ def get_Age_24(source):
 def get_right_24(source):
     div = source.find_all('div', class_ = 'jsx-d84db6a84feb175e mb-2 text-14 break-words text-se-neutral-80 text-description')
     return div[2].get_text(' ', strip=True)
+
+
     
     
     
