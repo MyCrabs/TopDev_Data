@@ -47,7 +47,7 @@ def get_profile_info_24(driver, url):
         right = get_right_24(page_source)
         return [title, company_name, time, place, age, sex, probation, way, job, head_quater, num_of_employee, exp_year, level, salary, edu, right, description, requirement, date, src_pic]
     except Exception as e:
-        logger.error(f"Error occurred while scraping data from {url}: {e}")
+        logger.error(f"Error occurred while scraping data from link {url}: {e}")
         return []
     
 def is_duplicated(info, data):
